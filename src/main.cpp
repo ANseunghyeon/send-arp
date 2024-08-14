@@ -99,7 +99,7 @@ char* get_my_ip(const char* ifname) {
     struct sockaddr_in* ip_addr = (struct sockaddr_in*)&ifr.ifr_addr;
     char* ip_str = (char*)malloc(16);
     unsigned char* ip = (unsigned char*)&ip_addr->sin_addr.s_addr;
-    snprintf(ip_str, 16, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+    snprintf(ip_str, 16, "%d.%d.%d.%d", ip[3], ip[2], ip[1], ip[0]);
 
     return ip_str;
 }
