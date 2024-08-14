@@ -94,7 +94,7 @@ Ip get_my_ip(const char* ifname) {
 
 Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
 {
-	send_arp(handle, my_mac, Mac("ff:ff:ff:ff:ff:ff"), my_ip, s_ip);
+	send_arp(handle, my_mac, Mac("ff:ff:ff:ff:ff:ff"), htons(my_ip), htons(s_ip));
 	Mac s_mac = Mac::nullMac();
 	
 	struct pcap_pkthdr* header;
