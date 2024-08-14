@@ -112,26 +112,21 @@ char* get_my_ip(char* ifname) {
 char* get_s_mac(pcap_t* handle, char* my_mac, char* my_ip, char* s_ip)
 {
 	send_arp(handle, my_mac, "ff:ff:ff:ff:ff:ff", my_ip, s_ip);
+	s_mac = Mac::nullMac();
 	
 	struct pcap_pkthdr* header;
     const u_char* packet_data;
     
-	char* s_mac = (char*)malloc(18);
-    memset(s_mac, 0, sizeof(s_mac));
 	
 	while (int res = pcap_next_ex(handle, &header, &packet_data) >= 0) {
         if (res == 0) continue; 
         EthArpPacket* recv_packet = (EthArpPacket*)packet_data;
 
-        if (ntohs(recv_packet->eth_.type_) == EthHdr::Arp &&
-            ntohs(recv_packet->arp_.op_) == ArpHdr::Reply &&
-            recv_packet->arp_.sip_ == htonl(Ip(s_ip))) {
-				
-            snprintf(s_mac, 18, "%02x:%02x:%02x:%02x:%02x:%02x",
-                     recv_packet->arp_.smac_[0], recv_packet->arp_.smac_[1],
-                     recv_packet->arp_.smac_[2], recv_packet->arp_.smac_[3],
-                     recv_packet->arp_.smac_[4], recv_packet->arp_.smac_[5]);
-        }
+        if (_recv_packet->eth_.type() == EthHdr::Arp_recv_packet->arp_.op() == ArpHdr::Reply){
+			s_mac = _recv_packet->arp_.smac();
+			break;
+		}
+        
     }
 
     return s_mac;
