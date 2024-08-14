@@ -98,7 +98,7 @@ Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
 	//send_arp(handle, my_mac, Mac("ff:ff:ff:ff:ff:ff"), htons(my_ip), htons(s_ip));
 	EthArpPacket packet;
 	
-	packet.eth_.dmac_ = s_mac;
+	packet.eth_.dmac_ = Mac("ff:ff:ff:ff:ff:ff");
 	packet.eth_.smac_ = my_mac;
 	packet.eth_.type_ = htons(EthHdr::Arp);
 
@@ -109,13 +109,12 @@ Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
 	packet.arp_.op_ = htons(ArpHdr::Request);
 	packet.arp_.smac_ = my_mac;
 	packet.arp_.sip_ = s_ip;
-	packet.arp_.tmac_ = s_mac;
+	packet.arp_.tmac_ = Mac("00:00:00:00:00:00");
 	packet.arp_.tip_ = t_ip;
 	
 	int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
 	if (res != 0) {
 		fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
-		return;
 	}
 	Mac s_mac = Mac::nullMac();
 	
