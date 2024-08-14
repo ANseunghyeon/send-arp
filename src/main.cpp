@@ -76,7 +76,6 @@ Ip get_my_ip(const char* ifname) {
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
         perror("Failed to create socket");
-        return Ip::nullIp();
     }
 
     memset(&ifr, 0, sizeof(ifr));
@@ -85,7 +84,6 @@ Ip get_my_ip(const char* ifname) {
     if (ioctl(sockfd, SIOCGIFADDR, &ifr) < 0) {
         perror("Failed to get IP address");
         close(sockfd);
-        return Ip::nullIp();
     }
 
     close(sockfd);
@@ -107,10 +105,8 @@ Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
         EthArpPacket* recv_packet = (EthArpPacket*)packet_data;
 
         if (recv_packet->eth_.type() == EthHdr::Arp && recv_packet->arp_.op() == ArpHdr::Reply){
-			if (recv_packet->arp_.sip() == s_ip && recv_packet->arp_.tip() == my_ip) {
-				s_mac = recv_packet->arp_.smac();
-				break;
-			}
+			s_mac = recv_packet->arp_.smac();
+			break;
 		}
     }
 
