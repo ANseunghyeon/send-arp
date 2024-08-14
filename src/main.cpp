@@ -23,7 +23,7 @@ void usage() {
 	printf("sample: send-arp-test wlan0\n");
 }
 
-void send_arp(const pcap_t* handle, const char* my_mac, const char* s_mac, const char* s_ip, const char* t_ip)
+void send_arp(pcap_t* handle, char* my_mac, char* s_mac, char* s_ip, char* t_ip)
 {
 	EthArpPacket packet;
 	
@@ -50,7 +50,7 @@ void send_arp(const pcap_t* handle, const char* my_mac, const char* s_mac, const
 	return;
 }
 
-char* get_my_mac(const char* ifname) {
+char* get_my_mac(char* ifname) {
     struct ifreq ifr;
     int sockfd;
     char* my_mac = (char*)malloc(18);
@@ -79,7 +79,7 @@ char* get_my_mac(const char* ifname) {
 
     return my_mac;
 }
-char* get_my_ip(const char* ifname) {
+char* get_my_ip(char* ifname) {
     struct ifreq ifr;
     int sockfd;
     char* ip_str = (char*)malloc(16); 
@@ -109,7 +109,7 @@ char* get_my_ip(const char* ifname) {
     return ip_str;
 }
 
-char* get_s_mac(const pcap_t* const handle, const char* my_mac, const char* my_ip, const char* s_ip);
+char* get_s_mac(pcap_t* handle, char* my_mac, char* my_ip, char* s_ip);
 {
 	send_arp(handle, my_mac, "ff:ff:ff:ff:ff:ff", my_ip, s_ip);
 	
