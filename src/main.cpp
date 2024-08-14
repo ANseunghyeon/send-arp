@@ -129,10 +129,6 @@ int main(int argc, char* argv[]) {
 	
 	Mac my_mac = get_my_mac(dev);
     Ip my_ip = get_my_ip(dev);
-    if (my_mac.isNull() || my_ip.isNull()) {
-        fprintf(stderr, "Failed to get my MAC or IP\n");
-        return -1;
-    }
 	
 	for (int i = 2; i < argc; i += 2)
 	{
