@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
     }
 	
 	Mac my_mac = Mac(my_mac_str);
-    Ip my_ip = Ip(my_ip_str);
+    Ip my_ip = Ip(ntohl(my_ip_str));
     free(my_mac_str);
     free(my_ip_str);  
 
