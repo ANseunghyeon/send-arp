@@ -109,7 +109,7 @@ char* get_my_ip(char* ifname) {
     return ip_str;
 }
 
-char* get_s_mac(pcap_t* handle, char* my_mac, char* my_ip, char* s_ip);
+char* get_s_mac(pcap_t* handle, char* my_mac, char* my_ip, char* s_ip)
 {
 	send_arp(handle, my_mac, "ff:ff:ff:ff:ff:ff", my_ip, s_ip);
 	
