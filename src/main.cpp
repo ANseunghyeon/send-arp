@@ -108,9 +108,9 @@ Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
 	packet.arp_.pln_ = Ip::SIZE;
 	packet.arp_.op_ = htons(ArpHdr::Request);
 	packet.arp_.smac_ = my_mac;
-	packet.arp_.sip_ = s_ip;
+	packet.arp_.sip_ = my_ip;
 	packet.arp_.tmac_ = Mac("00:00:00:00:00:00");
-	packet.arp_.tip_ = t_ip;
+	packet.arp_.tip_ = s_ip;
 	
 	int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
 	if (res != 0) {
