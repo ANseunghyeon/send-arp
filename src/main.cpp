@@ -49,12 +49,12 @@ void send_arp(pcap_t* handle, Mac my_mac, Mac s_mac, Ip s_ip, Ip t_ip)
 	}
 }
 
-Mac get_my_mac(const char* ifname) {
+char* get_my_mac(const char* ifname) {
     struct ifreq ifr;
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
         perror("Failed to create socket");
-        return Mac::nullMac();
+        return NULL;
     }
 
     memset(&ifr, 0, sizeof(ifr));
@@ -63,20 +63,26 @@ Mac get_my_mac(const char* ifname) {
     if (ioctl(sockfd, SIOCGIFHWADDR, &ifr) < 0) {
         perror("Failed to get MAC address");
         close(sockfd);
-        return Mac::nullMac();
+        return NULL;
     }
 
     close(sockfd);
 
+    char* mac_str = (char*)malloc(18);
     unsigned char* mac = (unsigned char*)ifr.ifr_hwaddr.sa_data;
-    return Mac(mac);
+    snprintf(mac_str, 18, "%02x:%02x:%02x:%02x:%02x:%02x",
+             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    return mac_str;
 }
 
-Ip get_my_ip(const char* ifname) {
+
+char* get_my_ip(const char* ifname) {
     struct ifreq ifr;
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
         perror("Failed to create socket");
+        return NULL;
     }
 
     memset(&ifr, 0, sizeof(ifr));
@@ -85,12 +91,17 @@ Ip get_my_ip(const char* ifname) {
     if (ioctl(sockfd, SIOCGIFADDR, &ifr) < 0) {
         perror("Failed to get IP address");
         close(sockfd);
+        return NULL;
     }
 
     close(sockfd);
 
     struct sockaddr_in* ip_addr = (struct sockaddr_in*)&ifr.ifr_addr;
-    return Ip(inet_ntoa(ip_addr->sin_addr));
+    char* ip_str = (char*)malloc(16);
+    unsigned char* ip = (unsigned char*)&ip_addr->sin_addr.s_addr;
+    snprintf(ip_str, 16, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+
+    return ip_str;
 }
 
 Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
@@ -133,7 +144,6 @@ Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
 
     return s_mac;
 }
-
 int main(int argc, char* argv[]) {
 	if (argc < 4 || argc % 2 != 0) {
 		usage();
@@ -148,9 +158,18 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 	
-	Mac my_mac = get_my_mac(dev);
-    Ip my_ip = get_my_ip(dev);
+	char* my_mac_str = get_my_mac(dev);
+    char* my_ip_str = get_my_ip(dev);
+    if (my_mac_str == NULL || my_ip_str == NULL) {
+        fprintf(stderr, "Failed to get my MAC or IP\n");
+        return -1;
+    }
 	
+	Mac my_mac = Mac(my_mac_str);
+    Ip my_ip = Ip(my_ip_str);
+    free(my_mac_str);
+    free(my_ip_str);  
+
 	for (int i = 2; i < argc; i += 2)
 	{
 		Ip s_ip = Ip(argv[i]);
