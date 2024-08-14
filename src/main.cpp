@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include "ethhdr.h"
 #include "arphdr.h"
+#include <unistd.h>
 
 #pragma pack(push, 1)
 struct EthArpPacket final {
@@ -73,7 +74,7 @@ char* get_my_mac(const char* ifname) {
     close(sockfd);
 
     unsigned char *mac = (unsigned char*) ifr.ifr_hwaddr.sa_data;
-    snprintf(mac_str, sizeof(mac_str), "%02x:%02x:%02x:%02x:%02x:%02x",
+    snprintf(my_mac, sizeof(my_mac), "%02x:%02x:%02x:%02x:%02x:%02x",
              mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
     return my_mac;
