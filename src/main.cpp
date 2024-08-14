@@ -38,8 +38,7 @@ void send_arp(pcap_t* handle, Mac my_mac, Mac s_mac, Ip s_ip, Ip t_ip)
 	packet.arp_.op_ = htons(ArpHdr::Request);
 	packet.arp_.smac_ = my_mac;
 	packet.arp_.sip_ = htonl(s_ip);
-	// packet.arp_.tmac_ = (s_mac == Mac("ff:ff:ff:ff:ff:ff")) ? Mac("00:00:00:00:00:00") : s_mac;
-	packet.arp_.tmac_ = s_mac;
+	packet.arp_.tmac_ = (s_mac == Mac("ff:ff:ff:ff:ff:ff")) ? Mac("00:00:00:00:00:00") : s_mac;
 	packet.arp_.tip_ = htonl(t_ip);
 	
 	int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
@@ -106,28 +105,9 @@ char* get_my_ip(const char* ifname) {
 
 Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
 {
-	//send_arp(handle, my_mac, Mac("ff:ff:ff:ff:ff:ff"), htons(my_ip), htons(s_ip));
-	EthArpPacket packet;
+	send_arp(handle, my_mac, Mac("ff:ff:ff:ff:ff:ff"), my_ip, s_ip);
 	
-	packet.eth_.dmac_ = Mac("ff:ff:ff:ff:ff:ff");
-	packet.eth_.smac_ = my_mac;
-	packet.eth_.type_ = htons(EthHdr::Arp);
-
-	packet.arp_.hrd_ = htons(ArpHdr::ETHER);
-	packet.arp_.pro_ = htons(EthHdr::Ip4);
-	packet.arp_.hln_ = Mac::SIZE;
-	packet.arp_.pln_ = Ip::SIZE;
-	packet.arp_.op_ = htons(ArpHdr::Request);
-	packet.arp_.smac_ = my_mac;
-	packet.arp_.sip_ = htonl(my_ip);
-	packet.arp_.tmac_ = Mac("00:00:00:00:00:00");
-	packet.arp_.tip_ = ntohl(s_ip);
-	
-	int res = pcap_sendpacket(handle, reinterpret_cast<const u_char*>(&packet), sizeof(EthArpPacket));
-	if (res != 0) {
-		fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(handle));
-	}
-	Mac s_mac = Mac::nullMac();
+	Mac s_mac;
 	
 	struct pcap_pkthdr* header;
     const u_char* packet_data;
@@ -136,7 +116,7 @@ Mac get_s_mac(pcap_t* handle, Mac my_mac, Ip my_ip, Ip s_ip)
         if (res == 0) continue; 
         EthArpPacket* recv_packet = (EthArpPacket*)packet_data;
 
-        if (recv_packet->eth_.type() == EthHdr::Arp && recv_packet->arp_.op() == ArpHdr::Reply){
+        if (recv_packet->eth_.type() == 0x0806 && recv_packet->arp_.op() == 2){
 			s_mac = recv_packet->arp_.smac();
 			break;
 		}
